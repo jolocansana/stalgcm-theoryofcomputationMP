@@ -1,0 +1,19 @@
+<xml>
+    <title>XML test</title>
+    <text type="test">
+        <body>
+            <p>
+             Though this is a very pared
+             <lb />
+             down XML document, it nonetheless
+             <lb />
+             provides an example of how an XML
+             <lb />
+             document displays on the web without
+             <lb />
+             the intercession of a stylesheet
+             <lb />
+             </p> 
+        </body>
+    </text>
+</xml>

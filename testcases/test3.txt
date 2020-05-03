@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<cim-Substation rdf:ID="_28159176D77E2467">
+    <cim-Naming.name>LEGAZZI</cim-Naming.name>
+    <cim-Substation.MemberOf_SubControlArea rdf:resource="#_55D3DE" />
+</cim-Substation>
+<cim-EnergyConsumer rdf:ID="_294A4B69">
+    <cim-EnergyConsumer.pfixed>19.78</cim-EnergyConsumer.pfixed>
+    <cim-EnergyConsumer.qfixed>10.78</cim-EnergyConsumer.qfixed>
+    <cim-EnergyConsumer.LoadArea rdf:resource="#_9C245B" />
+    <cim-Naming.name>4117</cim-Naming.name>
+</cim-EneergyConsumer>

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.io.*;
 
 public class Token
 {
@@ -43,21 +44,31 @@ public class Token
 		}
 	}
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
+
 		int state=0;
 		int i; // index
 		char curr; // currently processing character
 		String input3 = "<amu let size=\"medium\"> <gem>sapphire</gem> </amulet>";
 		String input2 = "<><</<></>>amulet<car>";
-		String input = "<?XMLFile><Colors><Color1>White</Color1><Color2>Blue</Color2><Color3>Black</Color3><Color4 Special=\"Light\tOpaque\">Green</Color4><Color5>Red</Color5></Colors><Fruits><Fruits1>Apple</Fruits1><Fruits2>Pineapple</Fruits2><Fruits3>Grapes</Fruits3><Fruits4>Melon</Fruits4></Fruits></XMLFile ?>";
+		//String input = "<?XMLFile><Colors><Color1>White</Color1><Color2>Blue</Color2><Color3>Black</Color3><Color4 Special=\"Light\tOpaque\">Green</Color4><Color5>Red</Color5></Colors><Fruits><Fruits1>Apple</Fruits1><Fruits2>Pineapple</Fruits2><Fruits3>Grapes</Fruits3><Fruits4>Melon</Fruits4></Fruits></XMLFile ?>";
 		String block = ""; // a block that will collect characters which builds up to a tag or attribute
 		ArrayList<Token> list = new ArrayList<>();
 		Token t;
-		System.out.println(input);
+		//System.out.println(input);
 		System.out.println();
 		System.out.println();
 		System.out.println();
+
+		File file = new File("C:\\Users\\louis\\Desktop\\test.txt");
+
+		BufferedReader br = new BufferedReader(new FileReader(file));
+
+		String input;
+		while ((input = br.readLine()) != null)
+		//System.out.println(input);
+
 
 		for(i = 0; i<input.length(); i++)
 		{
@@ -284,8 +295,8 @@ public class Token
 						else
 							state = 7;
 
-						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbol
 						list.add(new Token(block, 5)); // tokenize inner xml value
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbol
 						block = "";
 					}
 					else if(curr == 61) // =

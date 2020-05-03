@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<recipe>
+    <title>Peanut-butter On A Spoon</title>
+    <ingredientList>
+        <ingredient>Peanut-butter</ingredient>
+        <ingredient>Ice Cream</ingredient>
+        <ingredients>Big A** Spoon</ingredients>
+    </ingredientList>
+    <preparation>
+        Stick a spoon in a jar of peanut-butter, scoop and pull out a big glob of peanut
+    <preparation>
+</recipe>
