@@ -316,8 +316,8 @@ public class Token
 					break;
 			}
 		}
-
-		list.add(new Token(block, 5));
+		if(!block.equals(""))
+			list.add(new Token(block, 5));
 
 		//print all tokens
 		for(int x=0; x<list.size(); x++)
