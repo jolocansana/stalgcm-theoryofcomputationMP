@@ -277,14 +277,16 @@ public class Token
 					{
 						state = 8;
 					}
-					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
+					else if(curr == 60 || curr == 47 || curr == 63 ) // < > / ?
 					{
 						if( curr == 60 || curr == 47 || curr == 63)
 							state = 1;
 						else
 							state = 7;
 
-						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbole
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbol
+						list.add(new Token(block, 5)); // tokenize inner xml value
+						block = "";
 					}
 					else if(curr == 61) // =
 					{
