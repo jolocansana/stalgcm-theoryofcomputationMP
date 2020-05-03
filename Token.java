@@ -50,7 +50,7 @@ public class Token
 		char curr; // currently processing character
 		String input3 = "<amu let size=\"medium\"> <gem>sapphire</gem> </amulet>";
 		String input2 = "<><</<></>>amulet<car>";
-		String input = "<XMLFile><Colors><Color1>White</Color1><Color2>Blue</Color2><Color3>Black</Color3><Color4 Special=\"Light\tOpaque\">Green</Color4><Color5>Red</Color5></Colors><Fruits><Fruits1>Apple</Fruits1><Fruits2>Pineapple</Fruits2><Fruits3>Grapes</Fruits3><Fruits4>Melon</Fruits4></Fruits></XMLFile>";
+		String input = "<?XMLFile><Colors><Color1>White</Color1><Color2>Blue</Color2><Color3>Black</Color3><Color4 Special=\"Light\tOpaque\">Green</Color4><Color5>Red</Color5></Colors><Fruits><Fruits1>Apple</Fruits1><Fruits2>Pineapple</Fruits2><Fruits3>Grapes</Fruits3><Fruits4>Melon</Fruits4></Fruits></XMLFile ?>";
 		String block = ""; // a block that will collect characters which builds up to a tag or attribute
 		ArrayList<Token> list = new ArrayList<>();
 		Token t;
@@ -65,67 +65,93 @@ public class Token
 
 			switch(state)
 			{
-				case 0:
-					if(curr == 60)
+				case 0: // initial state
+					if(curr == 60 || curr == 47 || curr == 63) // < /
 					{
 						state = 1;
-						list.add(new Token(String.valueOf(curr), 0));
+						list.add(new Token(String.valueOf(curr), 0)); // < - symbol
 					}
-					else if(curr == 62)
+					else if(curr == 62) // >
 					{
-						state = 7;
-						list.add(new Token(String.valueOf(curr), 0));
+						state = 7; // state after a >
+						list.add(new Token(String.valueOf(curr), 0)); // > - symbol
 					}
 					else
 					{
-						state = 2;
+						state = 2; // state after < + string
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
 
-				case 1:
-					if(curr == 60 || curr == 47)
+				case 1: // accepted <
+					if(curr == 60 || curr == 47 || curr == 63) // < or backslash
 					{
 						state = 1;
 						list.add(new Token(String.valueOf(curr), 0));
 					}
-					else if(curr == 62)
+					else if(curr == 62) // >
 					{
 						state = 7;
 						list.add(new Token(String.valueOf(curr), 0));
 					}
-					else if(curr == 32)
-					{
-						state = 1;
-					}
-					else if(curr == 32)
+					else if(curr == 32) // Space
 					{
 						state = 1;
 					}
 					else
 					{
-						state = 2;
+						state = 2; // tag name build
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
-				case 2:
-					if(curr == 60)
+
+				case 2: // building tag name
+					if(curr == 60 || curr == 47 || curr == 63) // <
 					{
 						state = 1;
 						list.add(new Token(String.valueOf(curr), 0));
 					}
-					else if(curr == 62)
+					else if(curr == 62) // /
 					{
 						state = 7;
-						list.add(new Token(block, 1));
-						list.add(new Token(String.valueOf(curr), 0));
-						block = "";
+						list.add(new Token(block, 1)); // tokenize tag name
+						list.add(new Token(String.valueOf(curr), 0)); // backslash tokenized as symbol
+						block = ""; // reset block
 					}
-					else if(curr == 32)
+					else if(curr == 32) // Space
+					{
+						state = 3; // move on to accepting attribute name
+						block = block.concat(String.valueOf(curr));
+						list.add(new Token(block, 1)); // tokenize tag name
+						block = ""; // reset block
+					}
+					else
+					{
+						block = block.concat(String.valueOf(curr)); // continue building tag name
+					}
+					break;
+
+				case 3: // building attribute name
+					if(curr == 32) // space
 					{
 						state = 3;
-						block = block.concat(String.valueOf(curr));
-						list.add(new Token(block, 1));
+						list.add(new Token(block, 2)); // tokenize attribute name
+						block = "";
+					}
+					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
+					{
+						if( curr == 60 || curr == 47 || curr == 63)
+							state = 1;
+						else
+							state = 7;
+
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbole
+					}
+					else if(curr == 61) // =
+					{
+						state = 4; // move on to accepting attribute value
+						list.add(new Token(block, 2)); // tokenize attribute name
+						list.add(new Token(String.valueOf(curr), 4)); // tokenize symbol =
 						block = "";
 					}
 					else
@@ -134,52 +160,27 @@ public class Token
 					}
 					break;
 
-				case 3:
-					if(curr == 32)
-					{
-						state = 3;
-						list.add(new Token(block, 2));
-						block = "";
-					}
-					else if(curr == 60 || curr == 62)
-					{
-						state = 1;
-						list.add(new Token(String.valueOf(curr), 0));
-					}
-					else if(curr == 61)
-					{
-						state = 4;
-						list.add(new Token(block, 2));
-						list.add(new Token(String.valueOf(curr), 4));
-						block = "";
-					}
-					else
-					{
-						block = block.concat(String.valueOf(curr));
-					}
-					break;
+				case 4: // accepted = symbol
 
-				case 4:
-					if(curr == 34)
+					if(curr == 34) // open quotation mark "
 					{
 						state = 5;
 						block = block.concat(String.valueOf(curr));
 					}
-					else if(curr == 60 || curr == 62 )
+					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
 					{
-						state = 1;
-						list.add(new Token(String.valueOf(curr), 0));
+						if( curr == 60 || curr == 47 || curr == 63)
+							state = 1;
+						else
+							state = 7;
+
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbole
 					}
-					else if(curr == 61 )
+					else if(curr == 61) // =
 					{
-						state = 4;
-						list.add(new Token(String.valueOf(curr), 4));
-					}
-					else if(curr == 100000)
-					{
-						state = 4;
-						list.add(new Token(block, 2));
-						list.add(new Token(String.valueOf(curr), 4));
+						state = 4; // move on to accepting attribute value
+						list.add(new Token(block, 2)); // tokenize attribute name
+						list.add(new Token(String.valueOf(curr), 4)); // tokenize symbol =
 						block = "";
 					}
 					else
@@ -188,13 +189,29 @@ public class Token
 					}
 					break;
 
-				case 5:
-					if(curr == 34)
+				case 5: // building attribute value (accepted open quote)
+					if(curr == 34) // close quote "
 					{
 						state = 6;
 						block = block.concat(String.valueOf(curr));
-						list.add(new Token(block, 3));
+						list.add(new Token(block, 3)); // tokenize attribute value
 						block="";
+					}
+					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
+					{
+						if( curr == 60 || curr == 47 || curr == 63)
+							state = 1;
+						else
+							state = 7;
+
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbole
+					}
+					else if(curr == 61) // =
+					{
+						state = 4; // move on to accepting attribute value
+						list.add(new Token(block, 2)); // tokenize attribute name
+						list.add(new Token(String.valueOf(curr), 4)); // tokenize symbol =
+						block = "";
 					}
 					else
 					{
@@ -202,49 +219,74 @@ public class Token
 					}
 					break;
 
-				case 6:
-					if(curr == 32)
+				case 6: // accepted close quote mark
+
+					if(curr == 32) // space
 					{
 						state = 6;
 					}
-					else if(curr == 62)
+					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
 					{
-						state = 7;
-						list.add(new Token(String.valueOf(curr), 0));
+						if( curr == 60 || curr == 47 || curr == 63)
+							state = 1;
+						else
+							state = 7;
+
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbol
 					}
-					else if(curr == 60)
-					{
-						state = 1;
-						list.add(new Token(String.valueOf(curr), 0));
-					}
-					else if(curr == 61)
+					else if(curr == 61) // = symbol
 					{
 						state = 4;
 						list.add(new Token(String.valueOf(curr), 4));
 					}
 					else
 					{
-						state = 3;
+						state = 3; // building another attribute name
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
 
-				case 7:
-					if(curr == 32)
+				case 7: // tag is closed
+					if(curr == 32) // space
 					{
 						state = 7;
 					}
-					else if(curr == 60)
+					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
 					{
-						state = 1;
-						list.add(new Token(String.valueOf(curr), 0));
+						if( curr == 60 || curr == 47 || curr == 63)
+							state = 1;
+						else
+							state = 7;
+
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbole
 					}
-					else if(curr == 62)
+					else if(curr == 61) // =
 					{
-						state = 7;
-						list.add(new Token(String.valueOf(curr), 0));
+						state = 4;
+						list.add(new Token(String.valueOf(curr), 4));
 					}
-					else if(curr == 61)
+					else
+					{
+						state = 8; // inner xml content
+						block = block.concat(String.valueOf(curr));
+					}
+					break;
+
+				case 8: // building inner xml content
+					if(curr == 32) // space
+					{
+						state = 8;
+					}
+					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
+					{
+						if( curr == 60 || curr == 47 || curr == 63)
+							state = 1;
+						else
+							state = 7;
+
+						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbole
+					}
+					else if(curr == 61) // =
 					{
 						state = 4;
 						list.add(new Token(String.valueOf(curr), 4));
@@ -255,32 +297,6 @@ public class Token
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
-
-				case 8:
-					if(curr == 60)
-					{
-						state = 1;
-						list.add(new Token(block, 5));
-						list.add(new Token(String.valueOf(curr), 0));
-						block="";
-					}
-					else if(curr == 62)
-					{
-						state = 7;
-						list.add(new Token(String.valueOf(curr), 0));
-					}
-					else if(curr == 61)
-					{
-						state = 4;
-						list.add(new Token(String.valueOf(curr), 4));
-					}
-					else
-					{
-						state = 8;
-						block = block.concat(String.valueOf(curr));
-					}
-					break;
-
 			}
 		}
 
