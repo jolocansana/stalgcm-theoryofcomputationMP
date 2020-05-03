@@ -58,7 +58,7 @@ public class Token
 		Token t;
 		//System.out.println(input);
 
-		File file = new File("C:\\Users\\louis\\Desktop\\test3.txt");
+		File file = new File("C:\\Users\\louis\\Desktop\\test.txt");
 
 		BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -316,6 +316,8 @@ public class Token
 					break;
 			}
 		}
+
+		list.add(new Token(block, 5));
 
 		//print all tokens
 		for(int x=0; x<list.size(); x++)
