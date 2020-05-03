@@ -18,7 +18,31 @@ public class Solution
     {
         content = c;
         type = t;
-    }
+	}
+	
+	// Helper Functions
+	public static boolean isLetter(char c)
+	{
+		boolean lower, upper;
+
+		return (c >= 65 && c <=90) || (c >= 97 && c <=122);
+	}
+
+	public static boolean isNumeric(char c)
+	{
+		return c >= 48 && c <= 57;
+	}
+
+	public static boolean isUnderscore(char c)
+	{
+		return c == 95;
+	}
+
+	public static boolean isAlphanumeric(char c)
+	{
+		return isLetter(c) || isNumeric(c) || isUnderscore(c);
+	}
+
 
 	// Print Tokens with Type
     public void printTokens()
@@ -60,11 +84,14 @@ public class Solution
         int i; // index
 		char curr; // currently processing character
 		String block = ""; // a block that will collect characters which builds up to a tag or attribute
+		boolean terminate = false;
         ArrayList<Solution> list = new ArrayList<>();
         Solution t;
 		
 		for(i = 0; i<input.length(); i++)
 		{
+			if(terminate)
+				break;
 			curr = input.charAt(i);
 
 			switch(state)
@@ -102,20 +129,27 @@ public class Solution
 					{
 						state = 1;
 					}
-					else
+					else if( isLetter(curr) )
 					{
 						state = 2; // tag name build
+						block = block.concat(String.valueOf(curr));
+					}
+					else
+					{
+						state = 10;
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
 
 				case 2: // building tag name
-					if(curr == 60 || curr == 47 || curr == 63) // <
+				/*
+					if(curr == 60 || curr == 47 || curr == 63) // < ? /
 					{
 						state = 1;
 						list.add(new Solution(String.valueOf(curr), 0));
 					}
-					else if(curr == 62) // /
+				*/
+					if(curr == 62 || curr == 63) // >
 					{
 						state = 7;
 						list.add(new Solution(block, 1)); // tokenize tag name
@@ -129,9 +163,14 @@ public class Solution
 						list.add(new Solution(block, 1)); // tokenize tag name
 						block = ""; // reset block
 					}
-					else
+					else if( isAlphanumeric(curr) )
 					{
 						block = block.concat(String.valueOf(curr)); // continue building tag name
+					}
+					else
+					{
+						state = 10;
+						block = block.concat(String.valueOf(curr));
 					}
 					break;
 
@@ -158,8 +197,13 @@ public class Solution
 						list.add(new Solution(String.valueOf(curr), 4)); // tokenize symbol =
 						block = "";
 					}
+					else if( isAlphanumeric(curr) )
+					{
+						block = block.concat(String.valueOf(curr)); // continue building attr name
+					}
 					else
 					{
+						state = 10;
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
@@ -279,14 +323,16 @@ public class Solution
 					break;
 
 				case 8: // building inner xml content
+
+				/*
 					if(curr == 32) // space
 					{
 						state = 8;
 					}
-
+				*/
 					if(curr == 60 || curr == 63 ) // < > / ?
 					{
-						if( curr == 60)
+						if(curr == 60)
 							state = 1;
 						else
 							state = 7;
@@ -308,8 +354,14 @@ public class Solution
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
+
+				case 10:
+					list.add(new Solution(block, 6));
+					terminate = true;
+					block="";
 			}
 		}
+
 
 		if(!block.equals(""))
 			list.add(new Solution(block, 5));
@@ -331,8 +383,15 @@ public class Solution
 			curr = list.get(pos);
 			if(debugger)
 			{
-				System.out.println(curr.content);
-				System.out.println("CURRENT STATE " + state);
+				String topOfStack = "";
+				if(stack_checker.isEmpty()) topOfStack = "EMPTY"; 
+				else topOfStack = stack_checker.peek();
+
+				System.out.println("---------------");
+				System.out.println("CURRENT POS OF TOTAL: " + pos + "/" + (list.size()-1));
+				System.out.println("TOP OF STACK: " + topOfStack);
+				System.out.println("CURRENT POS: " + curr.content);
+				System.out.println("CURRENT STATE: " + state);
 			}
 
             switch(state)
@@ -388,7 +447,7 @@ public class Solution
 					state = 10;
 					if(curr.content.charAt(curr.content.length()-1) == ' ') curr.content = curr.content.substring(0, curr.content.length()-1);
                     stack_checker.push(curr.content);
-                    curr_tagname = curr.content;
+					curr_tagname = curr.content;
                     break;
                 case 10:
                     if(curr.type == 2) state = 11;
@@ -410,8 +469,9 @@ public class Solution
                     else if(curr.content.equals(">")) state = 16;
                     else return "NO";
                     break;
-                case 14:
-                    stack_checker.pop();
+				case 14:
+					stack_checker.pop();
+					pos--;
                     state = 15;
                     break;
                 case 15:
@@ -419,7 +479,6 @@ public class Solution
                     state = 16;
                     break;
 				case 16:
-					if(stack_checker.isEmpty() && pos != list.size()) return "NO"; // Invalid characters after last pop to stack
                     if(curr.type == 5) state = 16;
                     else if(curr.content.equals("<"))
                     {
@@ -445,6 +504,7 @@ public class Solution
                     break;
             }
 
+			if(!stack_checker.isEmpty() && pos == list.size()-1) return "NO";
             if(pos == list.size()-1) return "YES";
             pos++;
         }
@@ -457,8 +517,12 @@ public class Solution
 		boolean scannerOn = false;
 		if(debugger)
 		{
-			System.out.println("DEBUGGER ENABLED");
+			System.out.println(">> DEBUGGER ENABLED");
 		}
+		if(!scannerOn)
+        {
+            System.out.println(">> NOT SCANNING INPUT");
+        }
 		/*******************************************/
 
         Scanner keyin = new Scanner(System.in);
@@ -479,8 +543,8 @@ public class Solution
 		}
 		else
 		{
-			input = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><burger_patty>uehg</burger_patty>";
-			//input = "<burger_patty>uehg";
+			input = "<?xml?><a>";
+			//input = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><sample_tag>4989</sample_tag>";
 		}
 
 		ArrayList<Solution> list = Solution.tokenizer(input);
