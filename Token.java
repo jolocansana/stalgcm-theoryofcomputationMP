@@ -34,13 +34,13 @@ public class Token
 		{
 			System.out.println(this.content + " - operator");
 		}
-		else if(this.type == 6)
+		else if(this.type == 5)
 		{
-			System.out.println(this.content + " - invalid");
+			System.out.println(this.content + " - value");
 		}
 		else
 		{
-			System.out.println(this.content + " - value");
+			System.out.println(this.content + " - invalid");
 		}
 	}
 
@@ -57,11 +57,8 @@ public class Token
 		ArrayList<Token> list = new ArrayList<>();
 		Token t;
 		//System.out.println(input);
-		System.out.println();
-		System.out.println();
-		System.out.println();
 
-		File file = new File("C:\\Users\\louis\\Desktop\\test.txt");
+		File file = new File("C:\\Users\\louis\\Desktop\\test3.txt");
 
 		BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -208,6 +205,7 @@ public class Token
 						list.add(new Token(block, 3)); // tokenize attribute value
 						block="";
 					}
+					/*
 					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
 					{
 						if( curr == 60 || curr == 47 || curr == 63)
@@ -224,6 +222,7 @@ public class Token
 						list.add(new Token(String.valueOf(curr), 4)); // tokenize symbol =
 						block = "";
 					}
+					*/
 					else
 					{
 						block = block.concat(String.valueOf(curr));
@@ -284,13 +283,16 @@ public class Token
 					break;
 
 				case 8: // building inner xml content
+
+				/*
 					if(curr == 32) // space
 					{
 						state = 8;
 					}
-					else if(curr == 60 || curr == 47 || curr == 63 ) // < > / ?
+				*/
+					if(curr == 60 || curr == 63 ) // < > / ?
 					{
-						if( curr == 60 || curr == 47 || curr == 63)
+						if(curr == 60)
 							state = 1;
 						else
 							state = 7;
@@ -299,11 +301,13 @@ public class Token
 						list.add(new Token(String.valueOf(curr), 0)); // tokenize symbol
 						block = "";
 					}
+					/*
 					else if(curr == 61) // =
 					{
 						state = 4;
 						list.add(new Token(String.valueOf(curr), 4));
 					}
+					*/
 					else
 					{
 						state = 8;
