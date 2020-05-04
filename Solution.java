@@ -97,28 +97,47 @@ public class Solution
 			switch(state)
 			{
 				case 0: // initial state
-					if(curr == 60 || curr == 47 || curr == 63) // < /
+					if(curr == 60 || curr == 47 || curr == 63) // < / ?
 					{
 						state = 1;
 						list.add(new Solution(String.valueOf(curr), 0)); // < - symbol
+					}
+					else if(curr == 61) // =
+					{
+						state = 4; // move on to accepting attribute value
+						list.add(new Solution(block, 2)); // tokenize attribute name
+						list.add(new Solution(String.valueOf(curr), 4)); // tokenize symbol =
+						block = "";
 					}
 					else if(curr == 62) // >
 					{
 						state = 7; // state after a >
 						list.add(new Solution(String.valueOf(curr), 0)); // > - symbol
 					}
-					else
+					else if( isLetter(curr) || curr == 95 )
 					{
 						state = 2; // state after < + string
+						block = block.concat(String.valueOf(curr));
+					}
+					else
+					{
+						state = 10;
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
 
 				case 1: // accepted <
-					if(curr == 60 || curr == 47 || curr == 63) // < or backslash
+					if(curr == 60 || curr == 47 || curr == 63) // < / ?
 					{
 						state = 1;
 						list.add(new Solution(String.valueOf(curr), 0));
+					}
+					else if(curr == 61) // =
+					{
+						state = 4; // move on to accepting attribute value
+						list.add(new Solution(block, 2)); // tokenize attribute name
+						list.add(new Solution(String.valueOf(curr), 4)); // tokenize symbol =
+						block = "";
 					}
 					else if(curr == 62) // >
 					{
@@ -129,7 +148,7 @@ public class Solution
 					{
 						state = 1;
 					}
-					else if( isLetter(curr) )
+					else if( isLetter(curr) || curr == 95)
 					{
 						state = 2; // tag name build
 						block = block.concat(String.valueOf(curr));
@@ -142,14 +161,13 @@ public class Solution
 					break;
 
 				case 2: // building tag name
-				/*
-					if(curr == 60 || curr == 47 || curr == 63) // < ? /
+
+					if(curr == 60) // <
 					{
 						state = 1;
 						list.add(new Solution(String.valueOf(curr), 0));
 					}
-				*/
-					if(curr == 62 || curr == 63) // >
+					else if(curr == 62 || curr == 63) // > ?
 					{
 						state = 7;
 						list.add(new Solution(block, 1)); // tokenize tag name
@@ -163,7 +181,7 @@ public class Solution
 						list.add(new Solution(block, 1)); // tokenize tag name
 						block = ""; // reset block
 					}
-					else if( isAlphanumeric(curr) )
+					else if( isAlphanumeric(curr) || curr == 95 )
 					{
 						block = block.concat(String.valueOf(curr)); // continue building tag name
 					}
@@ -197,9 +215,10 @@ public class Solution
 						list.add(new Solution(String.valueOf(curr), 4)); // tokenize symbol =
 						block = "";
 					}
-					else if( isAlphanumeric(curr) )
+					else if( isLetter(curr) || curr == 95 )
 					{
 						block = block.concat(String.valueOf(curr)); // continue building attr name
+						state = 31;
 					}
 					else
 					{
@@ -208,12 +227,13 @@ public class Solution
 					}
 					break;
 
-				case 4: // accepted = symbol
+					case 31: // building attribute name
 
-					if(curr == 34) // open quotation mark "
+					if(curr == 32) // space
 					{
-						state = 5;
-						block = block.concat(String.valueOf(curr));
+						state = 3;
+						list.add(new Solution(block, 2)); // tokenize attribute name
+						block = "";
 					}
 					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
 					{
@@ -231,8 +251,47 @@ public class Solution
 						list.add(new Solution(String.valueOf(curr), 4)); // tokenize symbol =
 						block = "";
 					}
+					else if( isAlphanumeric(curr) || curr == 95 )
+					{
+						block = block.concat(String.valueOf(curr)); // continue building attr name
+						state = 31;
+					}
 					else
 					{
+						state = 10;
+						block = block.concat(String.valueOf(curr));
+					}
+					break;
+				
+
+				case 4: // accepted = symbol
+
+					if(curr == 34) // open quotation mark "
+					{
+						state = 5;
+						block = block.concat(String.valueOf(curr));
+					}
+					/*
+					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
+					{
+						if( curr == 60 || curr == 47 || curr == 63)
+							state = 1;
+						else
+							state = 7;
+
+						list.add(new Solution(String.valueOf(curr), 0)); // tokenize symbole
+					}
+					else if(curr == 61) // =
+					{
+						state = 4; // move on to accepting attribute value
+						list.add(new Solution(block, 2)); // tokenize attribute name
+						list.add(new Solution(String.valueOf(curr), 4)); // tokenize symbol =
+						block = "";
+					}
+					*/
+					else
+					{
+						state = 10;
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
@@ -270,6 +329,7 @@ public class Solution
 					break;
 
 				case 6: // accepted close quote mark
+						// waiting for new attribute or symbol
 
 					if(curr == 32) // space
 					{
@@ -289,9 +349,14 @@ public class Solution
 						state = 4;
 						list.add(new Solution(String.valueOf(curr), 4));
 					}
-					else
+					else if(isLetter(curr) || curr == 95)
 					{
 						state = 3; // building another attribute name
+						block = block.concat(String.valueOf(curr));
+					}
+					else
+					{
+						state = 10;
 						block = block.concat(String.valueOf(curr));
 					}
 					break;
@@ -301,19 +366,14 @@ public class Solution
 					{
 						state = 7;
 					}
-					else if(curr == 60 || curr == 62 || curr == 47 || curr == 63 ) // < > / ?
+					else if(curr == 60 || curr == 62) // < >
 					{
-						if( curr == 60 || curr == 47 || curr == 63)
+						if( curr == 60)
 							state = 1;
 						else
 							state = 7;
 
 						list.add(new Solution(String.valueOf(curr), 0)); // tokenize symbole
-					}
-					else if(curr == 61) // =
-					{
-						state = 4;
-						list.add(new Solution(String.valueOf(curr), 4));
 					}
 					else
 					{
@@ -324,13 +384,7 @@ public class Solution
 
 				case 8: // building inner xml content
 
-				/*
-					if(curr == 32) // space
-					{
-						state = 8;
-					}
-				*/
-					if(curr == 60 || curr == 63 ) // < > / ?
+					if(curr == 60 || curr == 62) // < >
 					{
 						if(curr == 60)
 							state = 1;
@@ -341,13 +395,6 @@ public class Solution
 						list.add(new Solution(String.valueOf(curr), 0)); // tokenize symbol
 						block = "";
 					}
-					/*
-					else if(curr == 61) // =
-					{
-						state = 4;
-						list.add(new Solution(String.valueOf(curr), 4));
-					}
-					*/
 					else
 					{
 						state = 8;
@@ -513,8 +560,8 @@ public class Solution
     public static void main(String[] args)
     {
 		/***************DEBUGGER********************/
-		boolean debugger = true;
-		boolean scannerOn = false;
+		boolean debugger = false;
+		boolean scannerOn = true;
 		if(debugger)
 		{
 			System.out.println(">> DEBUGGER ENABLED");
